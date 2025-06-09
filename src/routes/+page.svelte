@@ -76,8 +76,30 @@
 			attribution: "&copy; OpenStreetMap contributors",
 		}).addTo(map);
 
-		const marker = L.marker([lat, lng]).addTo(map);
-		marker.bindPopup("Launch site").openPopup();
+		const svgString = `
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+  <circle
+    cx="8" cy="8" r="6"
+    fill="#3388ff"
+    stroke="#ffffff"
+    stroke-width="2"
+  />
+</svg>`;
+
+		// 2. Wrap it in a DivIcon
+		const blueDotIcon = L.divIcon({
+			className: "", // no extra wrapper styles
+			html: svgString, // our inline circle
+			iconSize: [16, 16], // match the SVG viewport
+			iconAnchor: [8, 8], // center the circle on the lat/lng
+			popupAnchor: [0, -8], // pop-up just above the dot
+		});
+
+		// 3. Drop it onto the map
+		L.marker([lat, lng], { icon: blueDotIcon })
+			.addTo(map)
+			.bindPopup("Launch site")
+			.openPopup();
 
 		function redrawPoints() {
 			pathLayer.clearLayers();
