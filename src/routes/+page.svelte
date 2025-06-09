@@ -110,7 +110,7 @@
 					fillColor: color,
 					fillOpacity: 0.8,
 					weight: 1,
-				}).addTo(pathLayer);
+				}).addTo(pathLayer).bindPopup("Splashdown point");
 			});
 
 			max_points.forEach((coord) => {
@@ -124,7 +124,7 @@
 					fillColor: color,
 					fillOpacity: 0.8,
 					weight: 1,
-				}).addTo(pathLayer);
+				}).addTo(pathLayer).bindPopup("Max apogee point");
 			});
 		}
 
