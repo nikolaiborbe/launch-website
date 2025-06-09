@@ -1,6 +1,7 @@
 <script lang="ts">
   let {direction = 0, speed = 0} = $props()
 
+
 </script>
 
 <div class="p-4 bg-white rounded-xl border-2 border-slate-100 shadow-lg">
@@ -12,7 +13,7 @@
         viewBox="0 0 24 24"
         preserveAspectRatio="xMidYMid meet"
         aria-label="Wind direction {direction}"
-        style="transform: rotate({direction}deg);"
+        style="transform: rotate({direction-180}deg);"
       >
         <!-- Shaft -->
         <line
@@ -38,7 +39,7 @@
 
     <!-- Display direction and speed -->
     <div class="text-center text-nowrap text-lg font-bold">
-      <p>{direction}°</p>
+      <p>{(direction - 180 + 360) % 360}°</p>
       <p>{speed} m/s</p>
     </div>
   </div>
