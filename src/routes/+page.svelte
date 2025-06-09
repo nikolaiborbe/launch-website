@@ -8,9 +8,10 @@
 
 	import "leaflet/dist/leaflet.css";
 	import type { Map as LeafletMap } from "leaflet";
+	import Arrow from "$lib/components/Arrow.svelte";
 	let map: LeafletMap | null = null;
 
-	let current_landing_coords = $state<[number, number]>([0,0]);
+	let current_landing_coords = $state<[number, number]>([0, 0]);
 
 	// Dynamic flight status
 	let time = $state(
@@ -21,7 +22,7 @@
 		}),
 	);
 	let data: Data = $state({
-		max_velocity: 1,
+		max_velocity: 0,
 		apogee_time: 0,
 		apogee_altitude: 0,
 		impact_x: 0,
@@ -49,11 +50,13 @@
 		ori_lat: number,
 		ori_lon: number,
 		offset_x: number,
-		offset_y: number
+		offset_y: number,
 	): [number, number] {
 		const R = 6371e3; // Earth radius in meters
 		const lat = ori_lat + (offset_y / R) * (180 / Math.PI);
-		const lon = ori_lon + (offset_x / R) * (180 / Math.PI) / Math.cos((ori_lat * Math.PI) / 180);
+		const lon =
+			ori_lon +
+			((offset_x / R) * (180 / Math.PI)) / Math.cos((ori_lat * Math.PI) / 180);
 		return [lat, lon];
 	}
 
@@ -73,7 +76,8 @@
 			attribution: "&copy; OpenStreetMap contributors",
 		}).addTo(map);
 
-		L.marker([lat, lng]).addTo(map).bindPopup("Launch site").openPopup();
+		const marker = L.marker([lat, lng]).addTo(map);
+		marker.bindPopup("Launch site").openPopup();
 
 		function redrawPoints() {
 			pathLayer.clearLayers();
@@ -101,11 +105,16 @@
 				const statusData = (await res.json()) as Data;
 
 				data = {
-					...statusData
-				}
+					...statusData,
+				};
 
 				// update your points array
-				const landing_coords = offset_to_coords(lat, lng, data.impact_x, data.impact_y);
+				const landing_coords = offset_to_coords(
+					lat,
+					lng,
+					data.impact_x,
+					data.impact_y,
+				);
 				current_landing_coords = landing_coords;
 				points.push(landing_coords);
 				if (points.length > 100) points.shift();
@@ -145,13 +154,17 @@
 	});
 </script>
 
-{#snippet box(text: string, value: string | number, icon: string = "")}
+{#snippet box(text: string, value: string | number)}
 	<div class="py-4 rounded-3xl flex justify-between">
 		<div>
 			<img src="" alt="" />
 			<p>{text}:</p>
 		</div>
-		<p>{value}</p>
+		{#if data.impact_x === 0}
+			Loading...
+		{:else}
+			<p>{value}</p>
+		{/if}
 	</div>
 {/snippet}
 
@@ -170,10 +183,11 @@
 						{time}
 					</p>
 				</div>
+
 				<div class="flex flex-col gap-2">
-					{@render box("Landing X", current_landing_coords[0].toFixed(5))}
+					{@render box("Landing X", current_landing_coords[0].toFixed(7))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Landing Y", current_landing_coords[1].toFixed(5))}
+					{@render box("Landing Y", current_landing_coords[1].toFixed(7))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box("Max Speed", data.max_velocity.toFixed(2))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
@@ -194,11 +208,9 @@
 			class="cursor-pointer hover:bg-gray-100 transition-all duration-75 absolute top-1/2 -translate-y-1/2 bg-white rounded-r-xl shadow z-[1001] flex items-center justify-center w-6 h-16"
 		>
 			{#if sidebarOpen}
-				<span aria-hidden="true" class="text-gray-700 text-xs">&#x25C0;</span>
-				<!-- ◀ -->
+				<Arrow direction={1} />
 			{:else}
-				<span aria-hidden="true" class="text-gray-700 text-xs">&#x25B6;</span>
-				<!-- ▶ -->
+				<Arrow direction={0} />
 			{/if}
 		</button>
 
