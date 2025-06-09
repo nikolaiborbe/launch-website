@@ -110,21 +110,45 @@
 					fillColor: color,
 					fillOpacity: 0.8,
 					weight: 1,
-				}).addTo(pathLayer).bindPopup("Splashdown point");
+				})
+					.addTo(pathLayer)
+					.bindPopup(
+						"#" +
+							idx +
+							": Max apogee point " +
+							" (" +
+							coord[0].toFixed(7) +
+							", " +
+							coord[1].toFixed(7) +
+							") ",
+					);
 			});
 
-			max_points.forEach((coord) => {
+			max_points.forEach((coord, index) => {
 				// Map oldest to yellow (60°) and newest to red (0°)
 				//color yellow
-				const hue = 60;
+
+				const t = index / denom; // 0 = oldest, 1 = newest
+				const hue = 60 * (1 - t);
 				const color = `hsl(${hue}, 100%, 50%)`;
 				L.circleMarker(coord, {
-					radius: 5,
-					color,
+					radius: 4,
+					color: "black",
 					fillColor: color,
 					fillOpacity: 0.8,
 					weight: 1,
-				}).addTo(pathLayer).bindPopup("Max apogee point");
+				})
+					.addTo(pathLayer)
+					.bindPopup(
+						"#" +
+							index +
+							": Max apogee point " +
+							" (" +
+							coord[0].toFixed(7) +
+							", " +
+							coord[1].toFixed(7) +
+							") ",
+					);
 			});
 		}
 
@@ -161,7 +185,8 @@
 		}
 		// Initial fetch and periodic updates
 		fetchStatus();
-		setInterval(fetchStatus, 1000);
+		fetchStatus();
+		setInterval(fetchStatus, 60000);
 
 		return map;
 	}

@@ -39,7 +39,7 @@
 
     <!-- Display direction and speed -->
     <div class="text-center text-nowrap text-lg font-bold">
-      <p>{(direction - 180 + 360) % 360}°</p>
+      <p>{Math.round((direction - 180 + 360) % 360)}°</p>
       <p>{speed} m/s</p>
     </div>
   </div>
