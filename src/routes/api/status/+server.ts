@@ -1,7 +1,7 @@
 // src/routes/status/+server.ts
 import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
-import type {Data} from "../../types.ts"
+import type {Data} from "../../../types"
 
 
 export const GET: RequestHandler = async () => {
