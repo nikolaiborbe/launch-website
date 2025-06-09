@@ -1,14 +1,22 @@
-// src/routes/api/status/+server.ts
-import type { RequestHandler } from '../$types';
+// src/routes/status/+server.ts
+import type { RequestHandler } from './$types';
+import { json } from '@sveltejs/kit';
+import type {Data} from "../../types.ts"
+
 
 export const GET: RequestHandler = async () => {
-  const res = await fetch('https://launch-server.onrender.com/status');
-  const data = await res.json();
+  try {
+    const res = await fetch('https://launch-server.onrender.com/status');
 
-  return new Response(JSON.stringify(data), {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+    if (!res.ok) {
+      // forward upstream error status
+      return new Response(`Upstream error: ${res.statusText}`, { status: res.status });
     }
-  });
+
+    const data: Data = await res.json();
+    return json(data);
+  } catch (err) {
+    console.error('Error fetching status:', err);
+    return new Response('Internal server error', { status: 500 });
+  }
 };

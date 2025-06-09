@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Data } from "./types.ts";
 	import { onMount } from "svelte";
 	import { tick } from "svelte";
 	import { browser } from "$app/environment";
@@ -9,21 +10,27 @@
 	import type { Map as LeafletMap } from "leaflet";
 	let map: LeafletMap | null = null;
 
+	let current_landing_coords = $state<[number, number]>([0,0]);
+
 	// Dynamic flight status
-	let landing = $state({ x: 0, y: 0 });
-	let maxAltitude = $state(0);
-	let maxSpeed = $state(0);
-	let wind = $state(0);
 	let time = $state(
 		new Date().toLocaleString("no-NO", {
 			dateStyle: "medium",
 			timeStyle: "short",
 			timeZone: "Europe/Oslo",
-		})
+		}),
 	);
+	let data: Data = $state({
+		max_velocity: 1,
+		apogee_time: 0,
+		apogee_altitude: 0,
+		impact_x: 0,
+		impact_y: 0,
+		impact_velocity: 0,
+	});
 
-	const lat = 63.80263794391954;
-	const lng = 9.413957500356199;
+	const lat = 63.78679038026243;
+	const lng = 9.363081129686245;
 
 	// Example track (10 points) shifted ~25× farther west (oldest first, newest last)
 	let points: [number, number][] = [];
@@ -36,6 +43,18 @@
 		tick().then(() => {
 			map && map.invalidateSize();
 		});
+	}
+
+	function offset_to_coords(
+		ori_lat: number,
+		ori_lon: number,
+		offset_x: number,
+		offset_y: number
+	): [number, number] {
+		const R = 6371e3; // Earth radius in meters
+		const lat = ori_lat + (offset_y / R) * (180 / Math.PI);
+		const lon = ori_lon + (offset_x / R) * (180 / Math.PI) / Math.cos((ori_lat * Math.PI) / 180);
+		return [lat, lon];
 	}
 
 	/**
@@ -75,26 +94,26 @@
 		}
 
 		// Fetch flight status every second and update landing and points
-		function fetchStatus() {
-			fetch("/api/status")
-				.then((res) => res.json())
-				.then((data) => {
-					landing = data.landing;
-					maxAltitude = data.max_altitude;
-					maxSpeed = data.max_speed;
-					wind = data.wind;
-					const landingLatLng = map.containerPointToLatLng([
-						landing.x,
-						landing.y,
-					]);
-					points.push([landingLatLng.lat, landingLatLng.lng]);
-					// Keep only the most recent 100 points
-					if (points.length > 100) {
-						points.shift();
-					}
-					redrawPoints();
-				})
-				.catch((err) => console.error("Failed to fetch status", err));
+		async function fetchStatus() {
+			try {
+				const res = await fetch("/api/status"); // or '/api/status'
+				if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+				const statusData = (await res.json()) as Data;
+
+				data = {
+					...statusData
+				}
+
+				// update your points array
+				const landing_coords = offset_to_coords(lat, lng, data.impact_x, data.impact_y);
+				current_landing_coords = landing_coords;
+				points.push(landing_coords);
+				if (points.length > 100) points.shift();
+
+				redrawPoints();
+			} catch (err) {
+				console.error("Failed to fetch status", err);
+			}
 		}
 		// Initial fetch and periodic updates
 		fetchStatus();
@@ -152,15 +171,18 @@
 					</p>
 				</div>
 				<div class="flex flex-col gap-2">
-					{@render box("Landing X", landing.x.toFixed(2))}
+					{@render box("Landing X", current_landing_coords[0].toFixed(5))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Landing Y", landing.y.toFixed(2))}
+					{@render box("Landing Y", current_landing_coords[1].toFixed(5))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Max Altitude", maxAltitude.toFixed(2))}
+					{@render box("Max Speed", data.max_velocity.toFixed(2))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Max Speed", maxSpeed.toFixed(2))}
+					{@render box("Max Altitude", data.apogee_altitude.toFixed(2))}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Wind Speed", wind.toFixed(2))}
+					{@render box("Apogee Time", data.apogee_time.toFixed(2))}
+					<div class="w-full h-[1px] bg-gray-200"></div>
+					{@render box("Impact Velocity", data.impact_velocity.toFixed(2))}
+					<!-- {@render box("Wind Speed", wind.toFixed(2))} -->
 				</div>
 			</div>
 		</div>
@@ -172,14 +194,10 @@
 			class="cursor-pointer hover:bg-gray-100 transition-all duration-75 absolute top-1/2 -translate-y-1/2 bg-white rounded-r-xl shadow z-[1001] flex items-center justify-center w-6 h-16"
 		>
 			{#if sidebarOpen}
-				<span aria-hidden="true" class="text-gray-700 text-xs"
-					>&#x25C0;</span
-				>
+				<span aria-hidden="true" class="text-gray-700 text-xs">&#x25C0;</span>
 				<!-- ◀ -->
 			{:else}
-				<span aria-hidden="true" class="text-gray-700 text-xs"
-					>&#x25B6;</span
-				>
+				<span aria-hidden="true" class="text-gray-700 text-xs">&#x25B6;</span>
 				<!-- ▶ -->
 			{/if}
 		</button>
