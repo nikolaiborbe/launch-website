@@ -98,7 +98,8 @@
 
 		function redrawPoints() {
 			pathLayer.clearLayers();
-			const denom = Math.max(points.length - 1, 1);
+			const denom = Math.max(max_points.length - 1, 1);
+
 			points.forEach((coord, idx) => {
 				const t = idx / denom; // 0 = oldest, 1 = newest
 				// Map oldest to yellow (60°) and newest to red (0°)
@@ -121,7 +122,8 @@
 							", " +
 							coord[1].toFixed(7) +
 							") ",
-					);
+					)
+					.bringToFront();
 			});
 
 			max_points.forEach((coord, index) => {
@@ -148,7 +150,8 @@
 							", " +
 							coord[1].toFixed(7) +
 							") ",
-					);
+					)
+					.bringToFront();
 			});
 		}
 
