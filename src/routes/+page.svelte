@@ -87,14 +87,13 @@
 		});
 
 		const xHTML = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-       width="20" height="20"
-       transform="rotate(45 10 10)">
-    <path d="M2 10h16M10 2v16"
-          stroke="#d00" stroke-width="3" stroke-linecap="round"/>
-  </svg>`;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+     width="20" height="20">
+  <!-- two diagonals -->
+  <path d="M4 4 L16 16 M16 4 L4 16"
+        stroke="#d00" stroke-width="3" stroke-linecap="round"/>
+</svg>`;
 
-		/* build a DivIcon from that SVG */
 		const xIcon = L.divIcon({
 			className: "",
 			html: xHTML,
@@ -106,6 +105,7 @@
 		L.marker([lat, lng], { icon: blueDotIcon })
 			.addTo(map)
 			.bindPopup("Launch site");
+			
 
 		function drawMarkers(dayData: Day) {
 			pathLayer.clearLayers();
@@ -138,9 +138,7 @@
 				weight: 1,
 			})
 				.addTo(pathLayer)
-				.bindPopup(
-					`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`,
-				);
+				.bindPopup(`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`);
 
 			current_landing_coords = landing;
 		}
