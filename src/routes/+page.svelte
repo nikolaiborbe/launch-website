@@ -217,7 +217,7 @@
 	</div>
 {/snippet}
 
-<div class="relative flex text-sm md:text-base">
+<div class="relative flex text-sm md:text-base h-[100dvh]">
 	{#if sidebarOpen}
 		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20">
 			<div class="flex items-center justify-center p-6">
@@ -286,7 +286,7 @@
 		</div>
 	{/if}
 
-	<div class="relative flex-1">
+	<div class="relative flex-1 h-[100dvh]">
 		<button
 			onclick={toggleSidebar}
 			class="cursor-pointer hover:bg-gray-100 transition-all duration-75
