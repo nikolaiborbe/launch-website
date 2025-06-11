@@ -224,7 +224,7 @@
 
 <div class="relative flex text-sm md:text-base h-[100dvh]">
 	{#if sidebarOpen}
-		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20">
+		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20 touch-pan-y ">
 			<div class="flex items-center justify-center p-6">
 				<a href="https://www.propulse.no/" target="_blank">
 					<PropulseLogo width={150} height={87} color="steelblue" />
@@ -296,7 +296,7 @@
 			onclick={toggleSidebar}
 			class="cursor-pointer hover:bg-gray-100 transition-all duration-75
 						 absolute top-1/2 -translate-y-1/2 bg-white rounded-r-xl shadow
-						 z-[1001] flex items-center justify-center w-6 h-16"
+						 z-[1001] flex items-center justify-center w-6 h-16 touch-pan-y"
 		>
 			{#if sidebarOpen}
 				<Arrow direction={1} />
@@ -311,10 +311,21 @@
 </div>
 
 <style>
+	.no-scroll {
+		overflow: hidden;
+		height: 100%;
+	}
 	#map {
 		flex: 1;
 		min-width: 0;
 		height: 100dvh;
+		height: -webkit-fill-available;
 		width: 100%;
+	}
+	@supports not (height: 100dvh) {
+		/* very old browsers fall back to full vh */
+		#map {
+			height: 100vh;
+		}
 	}
 </style>

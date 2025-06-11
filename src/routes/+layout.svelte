@@ -4,6 +4,6 @@
 	let { children } = $props();
 </script>
 
-<div class="">
+<div class="overscroll-contain snap-start snap-mandatory ">
 	{@render children()}
 </div>
