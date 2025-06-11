@@ -38,6 +38,11 @@
 		sidebarOpen = !sidebarOpen;
 		tick().then(() => map?.invalidateSize());
 	}
+	$effect(() => {
+		if (browser) {
+			window.localStorage.setItem("sidebarOpen", String(sidebarOpen));
+		}
+	});
 
 	/* ------------------------------------------------------------------ */
 	/* helpers                                                             */
