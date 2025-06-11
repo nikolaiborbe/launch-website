@@ -1,5 +1,4 @@
 <script lang="ts">
-	/* component & lib imports ------------------------------------------ */
 	import WindDirection from "./../lib/components/WindDirection.svelte";
 	import type { Data, Day } from "../types";
 	import { onMount, tick } from "svelte";
@@ -11,11 +10,8 @@
 	import Arrow from "$lib/components/Arrow.svelte";
 	import DayPicker from "$lib/components/DayPicker.svelte";
 
-	/* ------------------------------------------------------------------ */
-	/* state                                                              */
-	/* ------------------------------------------------------------------ */
 	let map: LeafletMap | null = null;
-	let updateDay: (d: number) => void = () => {}; // set inside drawMap()
+	let updateDay: (d: number) => void = () => {};
 
 	let current_landing_coords = $state<[number, number]>([0, 0]);
 	let time = $state(
@@ -23,7 +19,7 @@
 			dateStyle: "medium",
 			timeStyle: "short",
 			timeZone: "Europe/Oslo",
-		}),
+		})
 	);
 	let data: Day | undefined = $state();
 	let display_day = $state(0);
@@ -31,9 +27,6 @@
 	const lat = 63.78679038026243;
 	const lng = 9.363081129686245;
 
-	/* ------------------------------------------------------------------ */
-	/* sidebar toggling                                                   */
-	/* ------------------------------------------------------------------ */
 	let sidebarOpen = $state(false);
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
@@ -44,26 +37,21 @@
 			window.localStorage.setItem("sidebarOpen", String(sidebarOpen));
 	});
 
-	/* ------------------------------------------------------------------ */
-	/* helpers                                                            */
-	/* ------------------------------------------------------------------ */
 	function offset_to_coords(
 		ori_lat: number,
 		ori_lon: number,
 		offset_x: number,
-		offset_y: number,
+		offset_y: number
 	): [number, number] {
 		const R = 6371e3;
 		const lat = ori_lat + (offset_y / R) * (180 / Math.PI);
 		const lon =
 			ori_lon +
-			((offset_x / R) * (180 / Math.PI)) / Math.cos((ori_lat * Math.PI) / 180);
+			((offset_x / R) * (180 / Math.PI)) /
+				Math.cos((ori_lat * Math.PI) / 180);
 		return [lat, lon];
 	}
 
-	/* ------------------------------------------------------------------ */
-	/* main: create the map once, expose updateDay()                      */
-	/* ------------------------------------------------------------------ */
 	async function drawMap(): Promise<LeafletMap | null> {
 		if (!browser) return null;
 
@@ -75,7 +63,6 @@
 			attribution: "&copy; OpenStreetMap contributors",
 		}).addTo(map);
 
-		/* launch-site blue dot ------------------------------------------ */
 		const blueDotIcon = L.divIcon({
 			className: "",
 			html: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
@@ -105,11 +92,9 @@
 			.openPopup()
 			.bindPopup("Launch site");
 
-		/* draws full path + key markers for one day --------------------- */
 		function drawMarkers(dayData: Day) {
 			pathLayer.clearLayers();
 
-			/* 1️⃣  normalise position → flat [[dx,dy,dz], …] ------------- */
 			let pointsRaw: unknown = dayData.data.flight_data.coords;
 			let triples: [number, number, number][] = [];
 
@@ -130,7 +115,8 @@
 			}
 
 			const latlngs = dayData.data.flight_data.coords.map(
-				([dx, dy]) => offset_to_coords(lat, lng, dx, dy) as [number, number],
+				([dx, dy]) =>
+					offset_to_coords(lat, lng, dx, dy) as [number, number]
 			);
 
 			const line = L.polyline(latlngs, {
@@ -139,28 +125,23 @@
 				renderer: L.canvas(),
 			}).addTo(pathLayer);
 
-			// if (latlngs.length > 1) {
-			// 	map?.fitBounds(line.getBounds(), { padding: [50, 50] });
-			// }
-
-			/* 3️⃣  landing & apogee markers ------------------------------ */
 			const landing = offset_to_coords(
 				lat,
 				lng,
 				dayData.data.impact_x,
-				dayData.data.impact_y,
+				dayData.data.impact_y
 			);
 			const apogee = offset_to_coords(
 				lat,
 				lng,
 				dayData.data.apogee_x,
-				dayData.data.apogee_y,
+				dayData.data.apogee_y
 			);
 
 			L.marker(landing, { icon: xIcon })
 				.addTo(pathLayer)
 				.bindPopup(
-					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`,
+					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`
 				);
 
 			L.circleMarker(apogee, {
@@ -171,14 +152,13 @@
 				weight: 1,
 			})
 				.addTo(pathLayer)
-				.bindPopup(`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`);
+				.bindPopup(
+					`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`
+				);
 
 			current_landing_coords = landing;
 		}
 
-		/* -------------------------------------------------------------- */
-		/* keep the last /api/status payload so we can redraw instantly   */
-		/* -------------------------------------------------------------- */
 		let days: Data | null = null;
 
 		async function fetchStatus() {
@@ -192,7 +172,6 @@
 			}
 		}
 
-		/* expose updateDay --------------------------------------------- */
 		updateDay = (day: number) => {
 			if (!days) return;
 			const d = days[day];
@@ -203,14 +182,11 @@
 		};
 
 		await fetchStatus(); // first load
-		setInterval(fetchStatus, 25_000); // refresh
+		setInterval(fetchStatus, 60_000); // refresh
 
 		return map;
 	}
 
-	/* ------------------------------------------------------------------ */
-	/* button handlers                                                    */
-	/* ------------------------------------------------------------------ */
 	function handleLeftClick() {
 		if (display_day > 0) {
 			display_day--;
@@ -224,9 +200,6 @@
 		}
 	}
 
-	/* ------------------------------------------------------------------ */
-	/* mount                                                              */
-	/* ------------------------------------------------------------------ */
 	onMount(async () => {
 		if (browser) {
 			sidebarOpen = window.matchMedia("(min-width: 768px)").matches;
@@ -235,7 +208,6 @@
 		map = await drawMap();
 		window.addEventListener("resize", () => map?.invalidateSize());
 
-		/* live clock --------------------------------------------------- */
 		setInterval(() => {
 			time = new Date().toLocaleString("no-NO", {
 				dateStyle: "medium",
@@ -274,32 +246,43 @@
 				class="flex flex-col p-4 m-4 gap-2 bg-white rounded-xl border-2 border-slate-100 shadow-lg"
 			>
 				<div class="flex justify-between items-center">
-					<p class="font-bold text-base md:text-xl">Flight Information</p>
+					<p class="font-bold text-base md:text-xl">
+						Flight Information
+					</p>
 					<p class="text-gray-500 text-xs md:text-sm">
 						{time}
 					</p>
 				</div>
 
 				<div class="flex flex-col gap-2">
-					{@render box("Landing X", current_landing_coords[0].toFixed(7) + "°")}
+					{@render box(
+						"Landing X",
+						current_landing_coords[0].toFixed(7) + "°"
+					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Landing Y", current_landing_coords[1].toFixed(7) + "°")}
+					{@render box(
+						"Landing Y",
+						current_landing_coords[1].toFixed(7) + "°"
+					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Max Speed",
-						data!.data.max_velocity.toFixed(2) + " m/s",
+						data!.data.max_velocity.toFixed(2) + " m/s"
 					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Max Altitude",
-						data!.data.apogee_altitude.toFixed(2) + " m",
+						data!.data.apogee_altitude.toFixed(2) + " m"
 					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box("Apogee Time", data!.data.apogee_time.toFixed(2) + " s")}
+					{@render box(
+						"Apogee Time",
+						data!.data.apogee_time.toFixed(2) + " s"
+					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Impact Velocity",
-						data!.data.impact_velocity.toFixed(2) + " m/s",
+						data!.data.impact_velocity.toFixed(2) + " m/s"
 					)}
 					<!-- {@render box("Wind Speed", wind.toFixed(2))} -->
 				</div>
@@ -325,7 +308,11 @@
 				{/if}
 
 				<div class="col-span-2">
-					<DayPicker {display_day} {handleLeftClick} {handleRightClick} />
+					<DayPicker
+						{display_day}
+						{handleLeftClick}
+						{handleRightClick}
+					/>
 				</div>
 			</div>
 		</div>
