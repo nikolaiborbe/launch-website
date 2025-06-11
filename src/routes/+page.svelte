@@ -40,9 +40,7 @@
 	}
 	$effect(() => {
 		if (browser) {
-			// add/remove on BOTH <html> and <body>
-			document.documentElement.classList.toggle("no-scroll", sidebarOpen);
-			document.body.classList.toggle("no-scroll", sidebarOpen);
+			window.localStorage.setItem("sidebarOpen", String(sidebarOpen));
 		}
 	});
 
@@ -316,7 +314,7 @@
 	#map {
 		flex: 1;
 		min-width: 0;
-		height: 100vh;
+		height: 100dvh;
 		width: 100%;
 	}
 </style>
