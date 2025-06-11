@@ -219,9 +219,11 @@
 
 <div class="relative flex text-sm md:text-base">
 	{#if sidebarOpen}
-		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-screen">
+		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20">
 			<div class="flex items-center justify-center p-6">
-				<PropulseLogo width={150} height={87} color="steelblue" />
+				<a href="https://www.propulse.no/" target="_blank">
+					<PropulseLogo width={150} height={87} color="steelblue" />
+				</a>
 			</div>
 			<div
 				class="flex flex-col p-4 m-4 gap-2 bg-white rounded-xl border-2 border-slate-100 shadow-lg"
