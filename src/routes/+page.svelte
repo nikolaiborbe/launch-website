@@ -40,7 +40,9 @@
 	}
 	$effect(() => {
 		if (browser) {
-			window.localStorage.setItem("sidebarOpen", String(sidebarOpen));
+			// add/remove on BOTH <html> and <body>
+			document.documentElement.classList.toggle("no-scroll", sidebarOpen);
+			document.body.classList.toggle("no-scroll", sidebarOpen);
 		}
 	});
 
