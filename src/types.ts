@@ -8,6 +8,8 @@ export interface FlightData {
   impact_x: number;
   impact_y: number;
   impact_velocity: number;
+  time_stamps: number[];
+  position: number[][][];
 }
 
 export interface WeatherData {
