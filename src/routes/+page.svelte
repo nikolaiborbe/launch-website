@@ -139,9 +139,9 @@
 				renderer: L.canvas(),
 			}).addTo(pathLayer);
 
-			if (latlngs.length > 1) {
-				map?.fitBounds(line.getBounds(), { padding: [50, 50] });
-			}
+			// if (latlngs.length > 1) {
+			// 	map?.fitBounds(line.getBounds(), { padding: [50, 50] });
+			// }
 
 			/* 3️⃣  landing & apogee markers ------------------------------ */
 			const landing = offset_to_coords(
