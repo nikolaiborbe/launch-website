@@ -219,7 +219,7 @@
 
 <div class="relative flex text-sm md:text-base">
 	{#if sidebarOpen}
-		<div class="w-82 md:w-[30rem] shadow-2xl">
+		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-screen">
 			<div class="flex items-center justify-center p-6">
 				<PropulseLogo width={150} height={87} color="steelblue" />
 			</div>
