@@ -301,7 +301,7 @@
 		</button>
 
 		<!-- the map itself -->
-		<div id="map" class="flex-1"></div>
+		<div id="map" class="flex-1 h-[100dvh]"></div>
 	</div>
 </div>
 
