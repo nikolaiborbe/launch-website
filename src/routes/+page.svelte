@@ -85,13 +85,28 @@
 			iconAnchor: [8, 8],
 			popupAnchor: [0, -8],
 		});
+
+		const xHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+       width="20" height="20"
+       transform="rotate(45 10 10)">
+    <path d="M2 10h16M10 2v16"
+          stroke="#d00" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+
+		/* build a DivIcon from that SVG */
+		const xIcon = L.divIcon({
+			className: "",
+			html: xHTML,
+			iconSize: [20, 20],
+			iconAnchor: [10, 10],
+			popupAnchor: [0, -10],
+		});
+
 		L.marker([lat, lng], { icon: blueDotIcon })
 			.addTo(map)
 			.bindPopup("Launch site");
 
-		/* -------------------------------------------------------------- */
-		/* points are wiped + redrawn *for a single day* here             */
-		/* -------------------------------------------------------------- */
 		function drawMarkers(dayData: Day) {
 			pathLayer.clearLayers();
 
@@ -108,14 +123,7 @@
 				dayData.data.apogee_y,
 			);
 
-			/* splash-down (big red dot) */
-			L.circleMarker(landing, {
-				radius: 8,
-				color: "hsl(0,100%,50%)",
-				fillColor: "hsl(0,100%,50%)",
-				fillOpacity: 0.8,
-				weight: 1,
-			})
+			L.marker(landing, { icon: xIcon })
 				.addTo(pathLayer)
 				.bindPopup(
 					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`,
@@ -131,7 +139,7 @@
 			})
 				.addTo(pathLayer)
 				.bindPopup(
-					`Max apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`,
+					`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`,
 				);
 
 			current_landing_coords = landing;
@@ -224,7 +232,9 @@
 
 <div class="relative flex text-sm md:text-base h-[100dvh]">
 	{#if sidebarOpen}
-		<div class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20 touch-pan-y ">
+		<div
+			class="w-82 md:w-[30rem] shadow-2xl overflow-auto h-[100dvh] pb-20 touch-pan-y"
+		>
 			<div class="flex items-center justify-center p-6">
 				<a href="https://www.propulse.no/" target="_blank">
 					<PropulseLogo width={150} height={87} color="steelblue" />
