@@ -160,7 +160,7 @@
 
 		/* first fetch + periodic refresh ------------------------------- */
 		await fetchStatus();
-		setInterval(fetchStatus, 60_000);
+		setInterval(fetchStatus, 25_000);
 
 		return map;
 	}
