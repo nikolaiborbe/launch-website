@@ -11,12 +11,18 @@ export interface FlightData {
 }
 
 export interface WeatherData {
+  time: string;
   temperature: number;
   pressure: number;
   wind_speed: number;
-  wind_direction: number;
+  wind_from_direction: number;
   humidity: number;
 }
 
+export interface Day {
+  data: FlightData;
+  weather: WeatherData;
+}
+
 // A two-element tuple: [flight, weather]
-export type Data = [FlightData, WeatherData];
+export type Data = Day[];
