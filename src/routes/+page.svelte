@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* component & lib imports ------------------------------------------ */
 	import WindDirection from "./../lib/components/WindDirection.svelte";
 	import type { Data, Day } from "../types";
 	import { onMount, tick } from "svelte";
@@ -11,10 +12,10 @@
 	import DayPicker from "$lib/components/DayPicker.svelte";
 
 	/* ------------------------------------------------------------------ */
-	/* state                                                               */
+	/* state                                                              */
 	/* ------------------------------------------------------------------ */
 	let map: LeafletMap | null = null;
-	let updateDay: (d: number) => void = () => {}; // will be set by drawMap()
+	let updateDay: (d: number) => void = () => {}; // set inside drawMap()
 
 	let current_landing_coords = $state<[number, number]>([0, 0]);
 	let time = $state(
@@ -31,7 +32,7 @@
 	const lng = 9.363081129686245;
 
 	/* ------------------------------------------------------------------ */
-	/* sidebar toggling just like before                                   */
+	/* sidebar toggling                                                   */
 	/* ------------------------------------------------------------------ */
 	let sidebarOpen = $state(false);
 	function toggleSidebar() {
@@ -39,13 +40,12 @@
 		tick().then(() => map?.invalidateSize());
 	}
 	$effect(() => {
-		if (browser) {
+		if (browser)
 			window.localStorage.setItem("sidebarOpen", String(sidebarOpen));
-		}
 	});
 
 	/* ------------------------------------------------------------------ */
-	/* helpers                                                             */
+	/* helpers                                                            */
 	/* ------------------------------------------------------------------ */
 	function offset_to_coords(
 		ori_lat: number,
@@ -62,7 +62,7 @@
 	}
 
 	/* ------------------------------------------------------------------ */
-	/* main: create the map once, expose updateDay()                       */
+	/* main: create the map once, expose updateDay()                      */
 	/* ------------------------------------------------------------------ */
 	async function drawMap(): Promise<LeafletMap | null> {
 		if (!browser) return null;
@@ -75,7 +75,7 @@
 			attribution: "&copy; OpenStreetMap contributors",
 		}).addTo(map);
 
-		/* launch-site blue dot ------------------------------------------------ */
+		/* launch-site blue dot ------------------------------------------ */
 		const blueDotIcon = L.divIcon({
 			className: "",
 			html: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
@@ -87,9 +87,7 @@
 		});
 
 		const xHTML = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-     width="20" height="20">
-  <!-- two diagonals -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20">
   <path d="M4 4 L16 16 M16 4 L4 16"
         stroke="#d00" stroke-width="3" stroke-linecap="round"/>
 </svg>`;
@@ -103,13 +101,49 @@
 		});
 
 		L.marker([lat, lng], { icon: blueDotIcon })
-			.openPopup()
 			.addTo(map)
+			.openPopup()
 			.bindPopup("Launch site");
 
+		/* draws full path + key markers for one day --------------------- */
 		function drawMarkers(dayData: Day) {
 			pathLayer.clearLayers();
 
+			/* 1️⃣  normalise position → flat [[dx,dy,dz], …] ------------- */
+			let pointsRaw: unknown = dayData.data.flight_data.coords;
+			let triples: [number, number, number][] = [];
+
+			if (
+				Array.isArray(pointsRaw) &&
+				pointsRaw.length > 0 &&
+				Array.isArray(pointsRaw[0][0])
+			) {
+				// nested depth-3 → flatten one level
+				triples = (pointsRaw as [number, number, number][][]).flat();
+			} else {
+				triples = pointsRaw as [number, number, number][];
+			}
+
+			if (!triples.length) {
+				console.warn("No trajectory points in day data");
+				return;
+			}
+
+			const latlngs = dayData.data.flight_data.coords.map(
+				([dx, dy]) => offset_to_coords(lat, lng, dx, dy) as [number, number],
+			);
+
+			const line = L.polyline(latlngs, {
+				color: "#d00",
+				weight: 3,
+				renderer: L.canvas(),
+			}).addTo(pathLayer);
+
+			if (latlngs.length > 1) {
+				map?.fitBounds(line.getBounds(), { padding: [50, 50] });
+			}
+
+			/* 3️⃣  landing & apogee markers ------------------------------ */
 			const landing = offset_to_coords(
 				lat,
 				lng,
@@ -129,7 +163,6 @@
 					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`,
 				);
 
-			/* max apogee (small yellow dot) */
 			L.circleMarker(apogee, {
 				radius: 4,
 				color: "#000",
@@ -153,15 +186,15 @@
 				const res = await fetch("/api/status");
 				if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 				days = (await res.json()) as Data;
-				updateDay(display_day); // redraw whatever day is active
+				updateDay(display_day); // redraw active day
 			} catch (e) {
 				console.error("Failed to fetch status", e);
 			}
 		}
 
-		/* expose updateDay so the buttons can call it ------------------ */
+		/* expose updateDay --------------------------------------------- */
 		updateDay = (day: number) => {
-			if (!days) return; // nothing fetched yet
+			if (!days) return;
 			const d = days[day];
 			if (d) {
 				data = d;
@@ -169,15 +202,14 @@
 			}
 		};
 
-		/* first fetch + periodic refresh ------------------------------- */
-		await fetchStatus();
-		setInterval(fetchStatus, 25_000);
+		await fetchStatus(); // first load
+		setInterval(fetchStatus, 25_000); // refresh
 
 		return map;
 	}
 
 	/* ------------------------------------------------------------------ */
-	/* button handlers: change index, then redraw via updateDay           */
+	/* button handlers                                                    */
 	/* ------------------------------------------------------------------ */
 	function handleLeftClick() {
 		if (display_day > 0) {
@@ -193,17 +225,17 @@
 	}
 
 	/* ------------------------------------------------------------------ */
-	/* mount: create the map once                                         */
+	/* mount                                                              */
 	/* ------------------------------------------------------------------ */
 	onMount(async () => {
 		if (browser) {
 			sidebarOpen = window.matchMedia("(min-width: 768px)").matches;
 		}
-		await tick(); // make sure the #map div has a size
+		await tick(); // ensure #map has dimensions
 		map = await drawMap();
 		window.addEventListener("resize", () => map?.invalidateSize());
 
-		/* clock ticker */
+		/* live clock --------------------------------------------------- */
 		setInterval(() => {
 			time = new Date().toLocaleString("no-NO", {
 				dateStyle: "medium",
