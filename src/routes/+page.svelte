@@ -103,9 +103,9 @@
 		});
 
 		L.marker([lat, lng], { icon: blueDotIcon })
+			.openPopup()
 			.addTo(map)
 			.bindPopup("Launch site");
-			
 
 		function drawMarkers(dayData: Day) {
 			pathLayer.clearLayers();
