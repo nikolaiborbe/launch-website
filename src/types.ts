@@ -29,5 +29,11 @@ export interface Day {
   weather: WeatherData;
 }
 
+export interface Settings {
+  fuel_mass: number;
+  length: number;
+  wind_direction: number;
+}
+
 // A two-element tuple: [flight, weather]
 export type Data = Day[];
