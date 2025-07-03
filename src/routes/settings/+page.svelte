@@ -15,16 +15,16 @@
     k.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 </script>
 
-<div class="w-screen h-screen bg-slate-50 flex justify-center items-center">
+<div class="w-screen h-screen bg-slate-50/50 flex justify-center items-center">
   <form
-    class="h-fit w-96 border-2 rounded-xl p-4 flex flex-col gap-4 bg-white shadow"
+    class="h-fit w-96 border-slate-100 shadow-xl rounded-xl p-4 flex flex-col gap-4 bg-white "
     onsubmit={() => console.log("submit", settings)}
   >
-    <h1 class="text-lg font-semibold text-slate-700">Settings</h1>
+    <h1 class="mb-2 text-xl font-bold">Settings</h1>
 
     {#each Object.entries(settings) as [key, value] (key)}
       <label class="flex justify-between items-center gap-2">
-        <span class="text-slate-600">{label(key)}</span>
+        <span class="">{label(key)}</span>
 
         <input
           type={typeOf(value)}
@@ -40,7 +40,7 @@
 
     <button
       type="submit"
-      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      class="mt-6 text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 dark:bg-gray-600 dark:hover:bg-gray-700 cursor-pointer focus:outline-none dark:focus:ring-gray-800 transition-all"
     >
       Save
     </button>
