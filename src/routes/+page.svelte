@@ -19,7 +19,7 @@
 			dateStyle: "medium",
 			timeStyle: "short",
 			timeZone: "Europe/Oslo",
-		})
+		}),
 	);
 	let data: Day | undefined = $state();
 	let display_day = $state(0);
@@ -41,14 +41,13 @@
 		ori_lat: number,
 		ori_lon: number,
 		offset_x: number,
-		offset_y: number
+		offset_y: number,
 	): [number, number] {
 		const R = 6371e3;
 		const lat = ori_lat + (offset_y / R) * (180 / Math.PI);
 		const lon =
 			ori_lon +
-			((offset_x / R) * (180 / Math.PI)) /
-				Math.cos((ori_lat * Math.PI) / 180);
+			((offset_x / R) * (180 / Math.PI)) / Math.cos((ori_lat * Math.PI) / 180);
 		return [lat, lon];
 	}
 
@@ -115,8 +114,7 @@
 			}
 
 			const latlngs = dayData.data.flight_data.coords.map(
-				([dx, dy]) =>
-					offset_to_coords(lat, lng, dx, dy) as [number, number]
+				([dx, dy]) => offset_to_coords(lat, lng, dx, dy) as [number, number],
 			);
 
 			const line = L.polyline(latlngs, {
@@ -129,19 +127,19 @@
 				lat,
 				lng,
 				dayData.data.impact_x,
-				dayData.data.impact_y
+				dayData.data.impact_y,
 			);
 			const apogee = offset_to_coords(
 				lat,
 				lng,
 				dayData.data.apogee_x,
-				dayData.data.apogee_y
+				dayData.data.apogee_y,
 			);
 
 			L.marker(landing, { icon: xIcon })
 				.addTo(pathLayer)
 				.bindPopup(
-					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`
+					`Splash-down (${landing[0].toFixed(7)}, ${landing[1].toFixed(7)})`,
 				);
 
 			L.circleMarker(apogee, {
@@ -152,9 +150,7 @@
 				weight: 1,
 			})
 				.addTo(pathLayer)
-				.bindPopup(
-					`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`
-				);
+				.bindPopup(`Apogee (${apogee[0].toFixed(7)}, ${apogee[1].toFixed(7)})`);
 
 			current_landing_coords = landing;
 		}
@@ -246,43 +242,32 @@
 				class="flex flex-col p-4 m-4 gap-2 bg-white rounded-xl border-2 border-slate-100 shadow-lg"
 			>
 				<div class="flex justify-between items-center">
-					<p class="font-bold text-base md:text-xl">
-						Flight Information
-					</p>
+					<p class="font-bold text-base md:text-xl">Flight Information</p>
 					<p class="text-gray-500 text-xs md:text-sm">
 						{time}
 					</p>
 				</div>
 
 				<div class="flex flex-col gap-2">
-					{@render box(
-						"Landing X",
-						current_landing_coords[0].toFixed(7) + "°"
-					)}
+					{@render box("Landing X", current_landing_coords[0].toFixed(7) + "°")}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box(
-						"Landing Y",
-						current_landing_coords[1].toFixed(7) + "°"
-					)}
+					{@render box("Landing Y", current_landing_coords[1].toFixed(7) + "°")}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Max Speed",
-						data!.data.max_velocity.toFixed(2) + " m/s"
+						data!.data.max_velocity.toFixed(2) + " m/s",
 					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Max Altitude",
-						data!.data.apogee_altitude.toFixed(2) + " m"
+						data!.data.apogee_altitude.toFixed(2) + " m",
 					)}
 					<div class="w-full h-[1px] bg-gray-200"></div>
-					{@render box(
-						"Apogee Time",
-						data!.data.apogee_time.toFixed(2) + " s"
-					)}
+					{@render box("Apogee Time", data!.data.apogee_time.toFixed(2) + " s")}
 					<div class="w-full h-[1px] bg-gray-200"></div>
 					{@render box(
 						"Impact Velocity",
-						data!.data.impact_velocity.toFixed(2) + " m/s"
+						data!.data.impact_velocity.toFixed(2) + " m/s",
 					)}
 					<!-- {@render box("Wind Speed", wind.toFixed(2))} -->
 				</div>
@@ -308,13 +293,17 @@
 				{/if}
 
 				<div class="col-span-2">
-					<DayPicker
-						{display_day}
-						{handleLeftClick}
-						{handleRightClick}
-					/>
+					<DayPicker {display_day} {handleLeftClick} {handleRightClick} />
 				</div>
-			</div>
+				<div class=" col-span-2 w-full flex justify-center">
+						<button
+							onclick={() => window.location.href = "/login"}
+							class="text-xl bg-white shadow-xl border-2 border-slate-100 h-14 rounded-xl w-full flex justify-center items-center hover:bg-gray-200 cursor-pointer transition-all"
+						>
+							Login
+						</button>
+					</div>
+				</div>
 		</div>
 	{/if}
 
