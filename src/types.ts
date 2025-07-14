@@ -29,10 +29,20 @@ export interface Day {
   weather: WeatherData;
 }
 
-export interface Settings {
+export interface MC_PostSettings {
+  number_simulations: number;
   fuel_mass: number;
+  wind_from_direction: number;
   length: number;
-  wind_direction: number;
+}
+
+interface ImpactPoint {
+  x: number;
+  y: number;
+}
+
+export interface MonteCarloResponse {
+  data: ImpactPoint[];
 }
 
 // A two-element tuple: [flight, weather]
